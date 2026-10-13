@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "976594475932",
+    "project_id": "podarvore-71e00",
+    "storage_bucket": "podarvore-71e00.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:976594475932:android:ea09a04db1dc37b3840659",
+        "android_client_info": {
+          "package_name": "com.example.podarvore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAu30lsHbUbhWwtBWk_6yoVcRM4YItcko"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
