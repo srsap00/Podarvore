@@ -15,14 +15,14 @@ fun AppNavigation() {
     // O startDestination define qual tela abre primeiro ao iniciar o app
     NavHost(navController = navController, startDestination = LoginRoute) {
 
-        // Configuração da Tela de Login
+         //Configuração da Tela de Login
         composable<LoginRoute> {
             TelaDeLogin(
                 onIrParaCadastro = {
                     navController.navigate(CadastroRoute)
-                },
-                onLoginSucesso = {
-                    // Navega para a Home e limpa o histórico para o usuário não voltar ao Login pelo botão físico "voltar"
+               },
+               onLoginSucesso = {
+                     //Navega para a Home e limpa o histórico para o usuário não voltar ao Login pelo botão físico "voltar"
                     navController.navigate(HomeRoute) {
                         popUpTo(LoginRoute) { inclusive = true }
                     }
@@ -30,7 +30,7 @@ fun AppNavigation() {
             )
         }
 
-        // Configuração da Tela de Cadastro
+        //Configuração da Tela de Cadastro
         composable<CadastroRoute> {
             TelaDeCadastro(
                 onIrParaLogin = {
@@ -47,12 +47,13 @@ fun AppNavigation() {
         // Configuração da Tela Principal (Home)
         composable<HomeRoute> {
             TelaHome(
-                onDeslogar = {
+               /* onDeslogar = {
                     navController.navigate(LoginRoute) {
                         popUpTo(HomeRoute) { inclusive = true }
                     }
-                }
+                }*/
             )
         }
     }
 }
+

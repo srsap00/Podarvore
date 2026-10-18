@@ -165,18 +165,25 @@ fun TelaHome(
             .padding(top = 90.dp)
     ) {
         item {
-            Button(onClick = { /* Ação do primeiro botão */ }) {
-                Text(text = "Olá puto", fontSize = 24.sp)
+            Button(onClick = { /* Ação do primeiro botão */ },
+                border = BorderStroke(3.dp, Color.Gray),
+                modifier = Modifier
+                    .padding(5.dp)
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .padding(horizontal = 20.dp),
+                shape = RoundedCornerShape(15.dp)) {
+                Text(text = "teste 1", fontSize = 24.sp)
             }
         }
         item {
             Button(onClick = { /* Ação do segundo botão */ }) {
-                Text(text = "Olá puta", fontSize = 24.sp)
+                Text(text = "teste 2", fontSize = 24.sp)
             }
         }
         item {
             Button(onClick = { /* Ação do terceiro botão */ }) {
-                Text(text = "Olá vadia", fontSize = 24.sp)
+                Text(text = "teste 3", fontSize = 24.sp)
             }
         }
 
@@ -201,7 +208,7 @@ fun TelaHome(
         )
         {
             Image(
-                painter = painterResource(id = R.drawable.teste),
+                painter = painterResource(id = R.drawable.arvore_exemplo1),
                 contentDescription = "cartão de denúncia", modifier = Modifier.size(100.dp)
                     .widthIn(max = 5.dp)
                     .heightIn(max = 5.dp)
@@ -219,7 +226,7 @@ fun TelaHome(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .width(250.dp)
-                //.height(IntrinsicSize.Min)
+                .height(IntrinsicSize.Min)
                 .border(
                     color = Color.Black, width = 1.dp, shape = RoundedCornerShape(8.dp)
                 )
@@ -230,7 +237,7 @@ fun TelaHome(
 
         {
             Image(
-                painter = painterResource(id = R.drawable.teste),
+                painter = painterResource(id = R.drawable.arvore_exemplo2),
                 contentDescription = "cartão de denúncia",
                 modifier = Modifier.size(100.dp))
             Text(text = "Denúncia realizada \n número 51464653",

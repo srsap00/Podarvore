@@ -36,8 +36,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 
 
+
 @Composable
-fun TelaDeLogin(onIrParaCadastro: () -> Unit, onLoginSucesso: () -> Unit) {
+fun TelaDeLogin(
+    onIrParaCadastro: () -> Unit, onLoginSucesso: () -> Unit
+) {
     var campo by remember { mutableStateOf(true) }
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
