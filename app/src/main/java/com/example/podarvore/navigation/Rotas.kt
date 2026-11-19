@@ -10,3 +10,6 @@ object CadastroRoute
 
 @Serializable
 object HomeRoute
+
+@Serializable
+object HistoricosDenunciasRoute

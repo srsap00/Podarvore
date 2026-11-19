@@ -7,6 +7,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.podarvore.TelaDeCadastro
 import com.example.podarvore.TelaHome
 import com.example.podarvore.TelaDeLogin
+import com.example.podarvore.ui.theme.Historico_denuncias
+
+//import com.example.podarvore.ui.theme.Minhas_denuncias
 
 @Composable
 fun AppNavigation() {
@@ -38,20 +41,31 @@ fun AppNavigation() {
                 },
                 onCadastroSucesso = {
                     navController.navigate(HomeRoute) {
-                        popUpTo(CadastroRoute) { inclusive = true }
+                        popUpTo(HomeRoute) { inclusive = true }
                     }
                 }
             )
         }
 
-        // Configuração da Tela Principal (Home)
+ // Configuração da Tela Principal (Home)
         composable<HomeRoute> {
             TelaHome(
-               /* onDeslogar = {
-                    navController.navigate(LoginRoute) {
-                        popUpTo(HomeRoute) { inclusive = true }
+                onIrParaDenuncias = {
+                    navController.navigate(HistoricosDenunciasRoute) {
+                        popUpTo(HistoricosDenunciasRoute) {inclusive = true}
                     }
-                }*/
+                }
+            )
+        }
+
+        composable<HistoricosDenunciasRoute> {
+            Historico_denuncias(
+                onIrParaHome = {
+                navController.navigate(HomeRoute) {
+                    popUpTo(HomeRoute) { inclusive = true }
+                }
+            }
+
             )
         }
     }

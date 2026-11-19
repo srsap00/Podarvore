@@ -58,12 +58,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
            AppNavigation()
-
         }
     }
 }
 
-
+val FundoClaro = Color(0xFFF4F9EE)
 
 @Composable
 fun TelaDeCadastro(onIrParaLogin: () -> Unit, onCadastroSucesso: () -> Unit) {
@@ -133,12 +132,10 @@ fun TelaDeCadastro(onIrParaLogin: () -> Unit, onCadastroSucesso: () -> Unit) {
 }
 
 
-@Preview
+
 @Composable
-fun TelaHome(
-    //onDeslogar: () -> Unit
-) {
-    Box(modifier = Modifier.fillMaxSize() .background(color = Color.White)){
+fun TelaHome(onIrParaDenuncias: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize() .background((FundoClaro))){
         Image(
             painter = painterResource(id = R.drawable.background_home),
             contentDescription = "fundo da home"
@@ -167,23 +164,44 @@ fun TelaHome(
         item {
             Button(onClick = { /* Ação do primeiro botão */ },
                 border = BorderStroke(3.dp, Color.Gray),
+
                 modifier = Modifier
                     .padding(5.dp)
                     .fillMaxWidth()
                     .height(50.dp)
-                    .padding(horizontal = 20.dp),
-                shape = RoundedCornerShape(15.dp)) {
-                Text(text = "teste 1", fontSize = 24.sp)
+                    .padding(horizontal = 5.dp),
+                shape = RoundedCornerShape(15.dp)
+            ){
+                Text(text = "Sobre nós", fontSize = 24.sp)
             }
         }
         item {
-            Button(onClick = { /* Ação do segundo botão */ }) {
-                Text(text = "teste 2", fontSize = 24.sp)
+            Button(onClick = {
+                onIrParaDenuncias()
+                             },
+                border = BorderStroke(3.dp, Color.Gray),
+                modifier = Modifier
+                    .padding(5.dp)
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .padding(horizontal = 5.dp),
+                    shape = RoundedCornerShape(15.dp),
+               // ButtonColors = ButtonDefaults.buttonColors( )
+            ) {
+                Text(text = "Minhas denúncias", fontSize = 24.sp)
             }
         }
         item {
-            Button(onClick = { /* Ação do terceiro botão */ }) {
-                Text(text = "teste 3", fontSize = 24.sp)
+            Button(onClick = { /* Ação do terceiro botão */ },
+                border = BorderStroke(3.dp, Color.Gray),
+                modifier = Modifier
+                    .padding(5.dp)
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .padding(horizontal = 5.dp),
+                    shape = RoundedCornerShape(15.dp)
+            ) {
+                Text(text = "informações do usuário", fontSize = 24.sp)
             }
         }
 
