@@ -1,6 +1,5 @@
 package com.example.podarvore
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,7 +17,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,7 +39,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.launch
 
-@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun TelaDeLogin(onIrParaCadastro: () -> Unit, onLoginSucesso: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current

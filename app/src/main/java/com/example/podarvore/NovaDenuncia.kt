@@ -140,6 +140,8 @@ fun NovaDenunciaScreen(onVoltar: () -> Unit, onConcluida: (String) -> Unit) {
                         erro = when {
                             uri == null -> "Selecione ou capture a fotografia da árvore."
                             endereco.isBlank() -> "Informe onde a árvore está localizada."
+                            endereco.trim().length > 500 -> "O endereço deve ter até 500 caracteres."
+                            descricao.trim().length > 5000 -> "A descrição deve ter até 5000 caracteres."
                             descricao.trim().length < 10 -> "Descreva o problema com pelo menos 10 caracteres."
                             else -> ""
                         }

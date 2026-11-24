@@ -1,7 +1,8 @@
 package com.example.podarvore.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.toRoute
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -35,13 +36,13 @@ fun AppNavigation() {
     fun voltar() { if (!nav.popBackStack()) paraHome() }
 
     NavHost(navController = nav, startDestination = if (logado) HomeRoute else LoginRoute) {
-        composable<LoginRoute> {
+        composable(LoginRoute) {
             TelaDeLogin(onIrParaCadastro = { nav.navigate(CadastroRoute) }, onLoginSucesso = { paraHome() })
         }
-        composable<CadastroRoute> {
+        composable(CadastroRoute) {
             TelaDeCadastro(onIrParaLogin = { voltar() }, onCadastroSucesso = { paraHome() })
         }
-        composable<HomeRoute> {
+        composable(HomeRoute) {
             TelaHome(
                 onIrParaDenuncias = { nav.navigate(HistoricosDenunciasRoute) },
                 onIrParaSobre = { nav.navigate(SobreRoute) },
@@ -50,14 +51,14 @@ fun AppNavigation() {
                 onDetalhes = { nav.navigate(DetalhesDenunciaRoute(it)) }
             )
         }
-        composable<HistoricosDenunciasRoute> {
+        composable(HistoricosDenunciasRoute) {
             Historico_denuncias(onIrParaHome = { voltar() }, onDetalhes = { nav.navigate(DetalhesDenunciaRoute(it)) })
         }
-        composable<SobreRoute> { SobreNosScreen(onBack = { voltar() }) }
-        composable<UsuarioRoute> {
+        composable(SobreRoute) { SobreNosScreen(onBack = { voltar() }) }
+        composable(UsuarioRoute) {
             InformacoesUsuarioScreen(onVoltar = { voltar() }, onLogout = { paraLogin() })
         }
-        composable<NovaDenunciaRoute> {
+        composable(NovaDenunciaRoute) {
             NovaDenunciaScreen(
                 onVoltar = { voltar() },
                 onConcluida = { id ->
@@ -67,9 +68,9 @@ fun AppNavigation() {
                 }
             )
         }
-        composable<DetalhesDenunciaRoute> { entrada ->
-            val argumentos = entrada.toRoute<DetalhesDenunciaRoute>()
-            DetalhesDenunciaScreen(denunciaId = argumentos.id, onBack = { voltar() })
+        composable(DetalhesRoute, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entrada ->
+            val id = requireNotNull(entrada.arguments?.getString("id"))
+            DetalhesDenunciaScreen(denunciaId = id, onBack = { voltar() })
         }
     }
 }

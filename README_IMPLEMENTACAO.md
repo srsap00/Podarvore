@@ -1,4 +1,4 @@
-# PodÁrvore — implementação do TCC
+# PodÁrvore — implementação do TCC (versão Spark)
 
 Este projeto mantém o pacote original `com.example.podarvore`, as imagens/fontes de `res` e as telas Android nativas em Kotlin + Jetpack Compose. Nenhuma denúncia de demonstração é criada pelo aplicativo.
 
@@ -9,7 +9,7 @@ Este projeto mantém o pacote original `com.example.podarvore`, as imagens/fonte
 3. **Home**: boas-vindas, três botões em `LazyRow`, duas denúncias recentes reais, botão de nova denúncia, acesso aos detalhes.
 4. **Histórico**: todas as denúncias do usuário, ordenadas por data, status, local, data e identificador; estado vazio verdadeiro.
 5. **Detalhes**: leitura da denúncia selecionada via ID, foto, local, descrição, data, área, órgão, status, resolução/andamento; abre aplicativo de mapas.
-6. **Nova denúncia**: três páginas independentes na interface com dados preservados no fluxo; foto por galeria/câmera, localização atual ou manual, área, órgão, envio de foto ao Storage e dos metadados ao Firestore.
+6. **Nova denúncia**: três páginas independentes na interface com dados preservados no fluxo; foto por galeria/câmera, localização atual ou manual, área, órgão, compressão e gravação da foto e dos metadados no Firestore, em lote atômico.
 7. **Informações do usuário**: nome, e-mail, localização, data de criação, edição, recuperação de senha, logout.
 8. **Sobre nós**: mantém tela original e inclui botão Voltar funcional.
 
@@ -31,20 +31,26 @@ Este projeto mantém o pacote original `com.example.podarvore`, as imagens/fonte
 - `latitude`, `longitude`: Double opcionais (quando GPS usado)
 - `area`: `Urbana` ou `Rural`
 - `orgaoResponsavel`: `Prefeitura`, `Companhia elétrica` ou `Departamento de trânsito`
-- `fotoUrl`: URL para exibir a fotografia enviada
-- `fotoCaminho`: caminho original do objeto no Storage
+- `temFoto`: Boolean, indica existência da fotografia no Firestore
 - `status`: começa com `Pendente`
 - `criadaEm`, `atualizadaEm`: Timestamp do servidor
 - `resolucao`, `andamento`: opcionais, preenchidos por administração, caso existam
 
-Armazenamento de fotos: `denuncias/{uid}/{documentId}` no Firebase Storage.
+`fotos_denuncias/{documentId}` (mesmo ID da denúncia):
+- `usuarioId`: uid do Firebase Auth
+- `dados`: Bytes/Blob JPEG (até 307.200 bytes = 300 KiB)
+- `tipo`: `image/jpeg`
+- `criadaEm`: Timestamp do servidor
+
+A foto é redimensionada para no máximo 1280 px no lado maior e comprimida fora da thread de interface. Se necessário, reduz-se a resolução e qualidade até caber no limite. Não são gravadas URLs públicas, Base64 ou metadados EXIF originais. A denúncia e a foto são gravadas em um único batch. As fotos são lidas separadamente apenas na Home (até duas) e nos detalhes; o Histórico não carrega os Blobs.
 
 O app usa listeners em tempo real do Firestore. Para evitar necessidade de índice composto adicional, carrega apenas denúncias do UID autenticado e ordena por data no cliente. Para muitos milhares de registros, pode ser útil um índice e paginação futuramente.
 
 ## Configuração externa obrigatória antes de testar
 
-1. No **Firebase Console** do projeto vinculado ao `app/google-services.json`, ative **Authentication > E-mail/senha**, **Cloud Firestore** e **Cloud Storage** e confira a configuração de cobrança e região do Storage, quando aplicável.
-2. **Implante as regras** fornecidas nos arquivos `firestore.rules` e `storage.rules` usando Firebase CLI (`firebase deploy --only firestore:rules,storage`) ou cole-as nos consoles respectivos. `firebase.json` está incluído.
+1. No **Firebase Console** do projeto vinculado ao `app/google-services.json`, ative **Authentication > E-mail/senha**, **Cloud Firestore** (Standard, banco padrão). Mantenha o plano Spark. Não é necessário ativar Storage ou cadastrar cartão de crédito.
+2. **Implante as regras** fornecidas em `firestore.rules`: Firebase Console > Firestore Database > Regras > publicar. Se usar Firebase CLI, execute `firebase deploy --only firestore:rules --project SEU_PROJECT_ID` na pasta do projeto. Revise regras existentes antes de substituir.
+   - Recomendado: em Firestore > Índices > Campo único, adicione uma isenção de indexação para o campo `dados` do grupo `fotos_denuncias` (desabilite todos os índices desse campo). `firestore.indexes.json` é uma configuração de referência para CLI; mescle com índices existentes antes de implantá-la para não removê-los. Não é necessário criar as coleções manualmente.
 3. **Google Login:** ative o provedor Google no Authentication. Adicione ao app no Firebase as impressões digitais SHA-1/SHA-256 das chaves de assinatura utilizadas e **baixe novamente `google-services.json`**. O arquivo original não possui `oauth_client`, portanto não fornece `default_web_client_id`; até atualizar, o app mostrará uma instrução clara ao tocar no botão Google.
 4. **Facebook Login:** crie um app no Meta for Developers, habilite Facebook Login e vincule o provedor no Firebase Authentication. Preencha `facebook_app_id` e `facebook_client_token` em `app/src/main/res/values/strings.xml` e configure chave hash e URI de redirecionamento OAuth exigidos pela Meta/Firebase. Antes disso o botão mostra uma mensagem de configuração pendente.
 5. Acessos de administração a status e resoluções **não** foram colocados no aplicativo do usuário: o arquivo de regras permite atualização dessas informações por contas com `usuarios/{uid}.role = 'admin'`, concedido somente por um administrador de confiança via Console/Admin SDK. A própria pessoa usuária não pode se promover a admin.
@@ -56,7 +62,7 @@ O app usa listeners em tempo real do Firestore. Para evitar necessidade de índi
 2. Crie uma conta com e-mail/senha, confirme que o documento `usuarios/{uid}` aparece.
 3. Entre, abra o perfil, edite nome/localização e confira se os dados são atualizados no Firestore.
 4. Confira o estado vazio na Home e no Histórico sem registros.
-5. Crie uma denúncia com foto, localização e descrição. Avance para área, selecione o órgão, envie. Confira foto no Storage e documento em `denuncias` com `usuarioId` correto.
+5. Crie uma denúncia com foto, localização e descrição. Avance para área, selecione o órgão, envie. Confira os documentos de mesmo ID em `fotos_denuncias` e `denuncias`, com `usuarioId` correto e o campo `dados` do tipo bytes.
 6. Abra a denúncia pela Home e Histórico, verifique data, foto, status e dados persistidos.
 7. Saia e entre com outra conta: confirme que a segunda conta **não** pode listar ou abrir denúncias da primeira.
 8. Teste recuperar senha. Depois de configurar OAuth, teste Google e Facebook em dispositivo.
@@ -65,12 +71,35 @@ O app usa listeners em tempo real do Firestore. Para evitar necessidade de índi
 ## Segurança e limitações
 
 - Nunca deixe o banco de produção em modo de teste. As regras de acesso por UID precisam ser aplicadas antes de publicar.
-- URLs de download de imagens do Firebase Storage são URLs de acesso por token: não compartilhe essas URLs publicamente. As regras do Storage protegem acessos via SDK, mas um link com token pode ser aberto por terceiros que o possuam. Para armazenamento privado mais estrito, carregar imagens pelo SDK autenticado usando `fotoCaminho`, sem URL pública.
+- O Spark permite 1 GiB de armazenamento, 50 mil leituras e 20 mil gravações por dia no banco elegível (consulte https://firebase.google.com/docs/firestore/quotas). Cada envio grava dois documentos, e as regras com leituras auxiliares também podem consumir cota. Ao exceder limites gratuitos, operações podem falhar; não há migração automática para Blaze. Firestore não é um serviço de arquivos; esta solução é para o volume limitado do TCC.
+- As regras limitam o tamanho do Blob, exigem o mesmo usuário nos dois registros e impedem alterações por usuários comuns. A validação de conteúdo JPEG real é feita no aplicativo; regras do Firestore não decodificam imagens.
+- Denúncias antigas permanecem no histórico. Fotos que já estavam no Storage não são migradas nem consultadas automaticamente; nesses casos a interface mostra o ícone de árvore. Se houver arquivos antigos acessíveis, a migração precisará ser feita separadamente.
+- Ao excluir uma denúncia com foto via cliente administrador, exclua os dois documentos em um lote. Via Console/Admin SDK, as regras não são aplicadas, portanto a limpeza de ambos é responsabilidade do administrador.
 - Novas denúncias criam status `Pendente`, mas não há integração de envio automático para prefeituras/concessionárias: a seleção registra **a indicação do órgão** no banco, não envia uma solicitação externa a ele.
 - A disponibilidade de `Google`/`Facebook` depende de cadastro OAuth, segredos e impressão digital no console, não pode ser concluída usando apenas o ZIP.
-- **Build de APK não foi executado neste ambiente** por falta de Android SDK/Gradle provisionados. É necessária sincronização e build no Android Studio para comprovar a compilação e testes reais com o projeto Firebase.
+- **Build de APK não pôde ser concluído neste ambiente:** `./gradlew :app:assembleDebug --offline` tentou baixar o Gradle 9.4.1 e foi interrompido por `UnknownHostException: services.gradle.org`. As regras também não foram publicadas nem executadas no emulador Firebase. É necessária sincronização e build no Android Studio para comprovar a compilação e testes reais com o projeto Firebase.
 
 ## Arquivos alterados / adicionados
 
 - Modificados: `app/build.gradle.kts`, `app/src/main/AndroidManifest.xml`, `app/src/main/res/values/strings.xml`, `app/src/main/java/com/example/podarvore/{cadastrar.kt,login.kt,Status_denuncia.kt,sobre_nos.kt}`, `app/src/main/java/com/example/podarvore/navigation/{Rotas.kt,AppNavigation.kt}`, `app/src/main/java/com/example/podarvore/ui/theme/Minhas_denuncias.kt`.
-- Adicionados: `app/src/main/java/com/example/podarvore/{Home.kt,InformacoesUsuario.kt,NovaDenuncia.kt}`, `app/src/main/java/com/example/podarvore/{data/Denuncia.kt,ui/componentes/PodarvoreUi.kt}`, `app/src/main/res/xml/file_paths.xml`, `firestore.rules`, `storage.rules`, `firebase.json`, `README_IMPLEMENTACAO.md`.
+- Adicionados: `app/src/main/java/com/example/podarvore/{Home.kt,InformacoesUsuario.kt,NovaDenuncia.kt}`, `app/src/main/java/com/example/podarvore/{data/Denuncia.kt,ui/componentes/PodarvoreUi.kt}`, `app/src/main/res/xml/file_paths.xml`, `firestore.rules`, `firebase.json`, `README_IMPLEMENTACAO.md`.
+
+
+## Alterações nesta versão Spark
+
+- `app/build.gradle.kts`: remove dependência do Storage e plugin/runtime de Kotlin Serialization.
+- `navigation/Rotas.kt` e `navigation/AppNavigation.kt`: rotas de texto com argumento `id`, mantendo o Navigation Compose; elimina a solicitação do plugin que falhou anteriormente.
+- `data/Denuncia.kt`: gravação em lote, leitura protegida de fotos e correção do mapeamento de documentos da lista.
+- `data/FotoComprimida.kt`: nova rotina de compressão, limite de bytes e orientação da imagem.
+- `ui/componentes/FotoDenuncia.kt`, `Home.kt`, `Status_denuncia.kt`: carregamento de foto binária, indicador de progresso e alternativa visual em caso de falha.
+- `NovaDenuncia.kt`, `login.kt`, `cadastrar.kt`: imports de `rememberSaveable` ausentes na versão anterior; validação dos comprimentos de texto em Nova denúncia.
+- `firestore.rules`, `firestore.indexes.json`, `firebase.json`: regras e configuração apenas Firestore; removido `storage.rules`.
+- Mantido `google-services.json`, identidade visual, configuração OAuth e demais versões do Gradle do projeto anterior. A remoção do plugin resolve a solicitação específica relatada, não comprova que todos os demais artefatos serão resolvidos.
+
+### Testes adicionais recomendados
+
+1. Envie imagem grande de câmera e galeria, inclusive retrato. Confirme orientação e limite de 307.200 bytes.
+2. Simule foto inválida ou sem permissão: deve aparecer erro sem criar registro incompleto.
+3. Confirme que outra conta não consegue ler `fotos_denuncias/{id}` nem a denúncia, mesmo conhecendo o ID.
+4. Verifique foto da Home e detalhes após fechar e reabrir o app. Teste também uma denúncia antiga sem `temFoto`.
+5. No plano Spark, confira a aba Uso no Firestore durante os testes.

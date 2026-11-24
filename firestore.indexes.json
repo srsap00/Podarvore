@@ -1,0 +1,6 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    { "collectionGroup": "fotos_denuncias", "fieldPath": "dados", "indexes": [] }
+  ]
+}

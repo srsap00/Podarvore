@@ -3,12 +3,13 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function entrou() { return request.auth != null; }
     function souEu(uid) { return entrou() && request.auth.uid == uid; }
-    // Perfil de administrador deve ser concedido somente pelo Firebase Console/Admin SDK.
     function admin() {
       return entrou()
         && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
         && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.get('role', '') == 'admin';
     }
+    function denuncia(id) { return /databases/$(database)/documents/denuncias/$(id); }
+    function foto(id) { return /databases/$(database)/documents/fotos_denuncias/$(id); }
 
     match /usuarios/{uid} {
       allow get: if souEu(uid) || admin();
@@ -21,13 +22,41 @@ service cloud.firestore {
 
     match /denuncias/{id} {
       allow create: if entrou()
-        && request.resource.data.usuarioId == request.auth.uid
+        && request.resource.data.keys().hasAll(['usuarioId', 'numero', 'descricao', 'localizacao', 'area', 'orgaoResponsavel', 'temFoto', 'status', 'criadaEm', 'atualizadaEm'])
+        && request.resource.data.keys().hasOnly(['usuarioId', 'numero', 'descricao', 'localizacao', 'area', 'orgaoResponsavel', 'temFoto', 'status', 'criadaEm', 'atualizadaEm', 'latitude', 'longitude'])
+        && souEu(request.resource.data.usuarioId)
         && request.resource.data.status == 'Pendente'
-        && request.resource.data.keys().hasAll(['usuarioId', 'numero', 'descricao', 'localizacao', 'area', 'orgaoResponsavel', 'fotoUrl', 'status', 'criadaEm']);
+        && request.resource.data.temFoto == true
+        && request.resource.data.numero is string && request.resource.data.numero.size() <= 32
+        && request.resource.data.descricao is string && request.resource.data.descricao.size() >= 10 && request.resource.data.descricao.size() <= 5000
+        && request.resource.data.localizacao is string && request.resource.data.localizacao.size() > 0 && request.resource.data.localizacao.size() <= 500
+        && request.resource.data.area in ['Urbana', 'Rural']
+        && request.resource.data.orgaoResponsavel in ['Prefeitura', 'Companhia elétrica', 'Departamento de trânsito']
+        && request.resource.data.criadaEm == request.time && request.resource.data.atualizadaEm == request.time
+        && (!('latitude' in request.resource.data) || (request.resource.data.latitude is number && request.resource.data.latitude >= -90 && request.resource.data.latitude <= 90))
+        && (!('longitude' in request.resource.data) || (request.resource.data.longitude is number && request.resource.data.longitude >= -180 && request.resource.data.longitude <= 180))
+        && getAfter(foto(id)).data.usuarioId == request.auth.uid;
       allow get, list: if entrou() && (resource.data.usuarioId == request.auth.uid || admin());
-      // Usuários não podem alterar status ou inventar resoluções.
-      allow update: if admin() && request.resource.data.usuarioId == resource.data.usuarioId;
-      allow delete: if admin();
+      allow update: if admin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'resolucao', 'andamento', 'atualizadaEm']);
+      // Remova também a foto no mesmo lote, caso exista.
+      allow delete: if admin() && !existsAfter(foto(id));
+    }
+
+    match /fotos_denuncias/{id} {
+      allow create: if entrou()
+        && request.resource.data.keys().hasAll(['usuarioId', 'dados', 'tipo', 'criadaEm'])
+        && request.resource.data.keys().hasOnly(['usuarioId', 'dados', 'tipo', 'criadaEm'])
+        && souEu(request.resource.data.usuarioId)
+        && request.resource.data.tipo == 'image/jpeg'
+        && request.resource.data.dados is bytes
+        && request.resource.data.dados.size() > 0 && request.resource.data.dados.size() <= 307200
+        && request.resource.data.criadaEm == request.time
+        && !exists(denuncia(id))
+        && getAfter(denuncia(id)).data.usuarioId == request.auth.uid
+        && getAfter(denuncia(id)).data.temFoto == true;
+      allow get: if entrou() && ((souEu(resource.data.usuarioId) && souEu(get(denuncia(id)).data.usuarioId)) || admin());
+      allow list, update: if false;
+      allow delete: if admin() && !existsAfter(denuncia(id));
     }
   }
 }

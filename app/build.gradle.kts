@@ -2,12 +2,11 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
-    kotlin("plugin.serialization") version "2.2.10"
 }
 
 android {
     namespace = "com.example.podarvore"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.podarvore"
@@ -61,13 +60,11 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-storage")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("androidx.credentials:credentials:1.5.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     implementation("com.facebook.android:facebook-login:19.0.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
 }

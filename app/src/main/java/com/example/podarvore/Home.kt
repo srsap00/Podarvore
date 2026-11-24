@@ -27,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.example.podarvore.data.Denuncia
 import com.example.podarvore.data.RepositorioDenuncias
 import com.example.podarvore.data.emPortugues
@@ -127,13 +126,7 @@ fun TelaHome(
 fun ResumoDenuncia(denuncia: Denuncia, onClick: () -> Unit) {
     CartaoArvore(modifier = Modifier.fillMaxWidth(.83f), onClick = onClick) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            if (denuncia.fotoUrl.isNotBlank()) {
-                AsyncImage(model = denuncia.fotoUrl, contentDescription = "Foto da árvore",
-                    modifier = Modifier.size(54.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(7.dp)),
-                    contentScale = ContentScale.Crop)
-            } else {
-                Icon(Icons.Default.Forest, "Árvore", modifier = Modifier.size(54.dp), tint = VerdeArvore)
-            }
+            FotoDenuncia(denuncia, modifier = Modifier.size(54.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(7.dp)))
             Spacer(Modifier.width(10.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text("Denúncia realizada\nnúmero ${denuncia.numero}", textAlign = TextAlign.Center,

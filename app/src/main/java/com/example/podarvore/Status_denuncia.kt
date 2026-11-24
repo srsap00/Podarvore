@@ -29,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.example.podarvore.data.Denuncia
 import com.example.podarvore.data.RepositorioDenuncias
 import com.example.podarvore.data.emPortugues
@@ -62,10 +61,7 @@ fun DetalhesDenunciaScreen(denunciaId: String, onBack: () -> Unit) {
             else -> {
                 val d = denuncia!!
                 Box(Modifier.offset(y = (-5).dp).size(175.dp).clip(CircleShape).background(VerdeArvore), contentAlignment = Alignment.Center) {
-                    if (d.fotoUrl.isNotBlank())
-                        AsyncImage(model = d.fotoUrl, contentDescription = "Fotografia da árvore denunciada",
-                            modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                    else Icon(Icons.Default.Forest, "Fotografia não disponível", tint = Color.White, modifier = Modifier.size(70.dp))
+                    FotoDenuncia(d, modifier = Modifier.fillMaxSize(), cor = Color.White)
                 }
                 Text("Número ${d.numero}", fontStyle = FontStyle.Italic, fontSize = 14.sp, color = Color.Black)
                 Spacer(Modifier.height(12.dp))

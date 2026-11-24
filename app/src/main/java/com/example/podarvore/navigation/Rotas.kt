@@ -1,12 +1,13 @@
 package com.example.podarvore.navigation
 
-import kotlinx.serialization.Serializable
+import android.net.Uri
 
-@Serializable object LoginRoute
-@Serializable object CadastroRoute
-@Serializable object HomeRoute
-@Serializable object HistoricosDenunciasRoute
-@Serializable object SobreRoute
-@Serializable object UsuarioRoute
-@Serializable object NovaDenunciaRoute
-@Serializable data class DetalhesDenunciaRoute(val id: String)
+internal const val LoginRoute = "login"
+internal const val CadastroRoute = "cadastro"
+internal const val HomeRoute = "home"
+internal const val HistoricosDenunciasRoute = "historico"
+internal const val SobreRoute = "sobre"
+internal const val UsuarioRoute = "usuario"
+internal const val NovaDenunciaRoute = "nova_denuncia"
+internal const val DetalhesRoute = "detalhes/{id}"
+internal fun DetalhesDenunciaRoute(id: String) = "detalhes/${Uri.encode(id)}"
